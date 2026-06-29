@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RS3 Stats — ScarosZ vs Dux Daedalus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c11;
+    --panel:#14181f;
+    --panel-2:#1b2029;
+    --line:#2a313d;
+    --txt:#e7e9ee;
+    --muted:#8b93a3;
+    --gold:#f5c542;
+    --gold-bright:#ffe07a;
+    --p1:#3da5ff;          /* ScarosZ — azure */
+    --p1-bright:#7cc6ff;
+    --p2:#ff6b4a;          /* Dux Daedalus — ember */
+    --p2-bright:#ff9277;
+    --win:#3ad17a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--txt);
+    background:
+      radial-gradient(1200px 700px at 20% -10%, rgba(61,165,255,.10), transparent 60%),
+      radial-gradient(1200px 700px at 80% -10%, rgba(255,107,74,.10), transparent 60%),
+      radial-gradient(900px 900px at 50% 120%, rgba(245,197,66,.06), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+    padding:clamp(14px,3vw,42px);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+
+  /* ---------- Title ---------- */
+  .title{text-align:center;margin-bottom:clamp(18px,3vw,30px)}
+  .title .kicker{
+    font-family:'Cinzel',serif;letter-spacing:.32em;text-transform:uppercase;
+    font-size:clamp(11px,1.6vw,13px);color:var(--gold);font-weight:700;
+  }
+  .title h1{
+    font-family:'Cinzel',serif;font-weight:900;line-height:1.05;
+    font-size:clamp(26px,5.4vw,52px);margin:6px 0 4px;
+    background:linear-gradient(180deg,#fff,#cfd6e3 60%,#9aa3b4);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 30px rgba(0,0,0,.4);
+  }
+  .title .sub{color:var(--muted);font-size:clamp(12px,1.7vw,14px)}
+
+  /* ---------- Total-level header cards ---------- */
+  .totals{
+    display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(8px,1.6vw,18px);
+    align-items:stretch;margin-bottom:22px;
+  }
+  .pcard{
+    position:relative;border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:clamp(16px,2.6vw,26px);overflow:hidden;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .pcard::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% -20%, var(--accent-soft), transparent 70%);}
+  .pcard.p1{--accent:var(--p1);--accent-soft:rgba(61,165,255,.18)}
+  .pcard.p2{--accent:var(--p2);--accent-soft:rgba(255,107,74,.18)}
+  .pcard .pname{
+    display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-weight:700;
+    font-size:clamp(15px,2.4vw,21px);color:#fff;letter-spacing:.02em;
+  }
+  .pcard.p2 .pname{justify-content:flex-end;text-align:right}
+  .pcard .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .pcard .label{margin-top:14px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+  .pcard.p2 .label,.pcard.p2 .totxp,.pcard.p2 .rank{text-align:right}
+  .pcard .totlvl{font-family:'Cinzel',serif;font-weight:900;line-height:1;
+    font-size:clamp(46px,11vw,92px);
+    background:linear-gradient(180deg,#fff,var(--accent));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .pcard .totxp{margin-top:6px;font-weight:700;font-size:clamp(13px,2vw,16px);color:var(--txt)}
+  .pcard .totxp span{color:var(--muted);font-weight:500}
+  .pcard .rank{margin-top:2px;font-size:12px;color:var(--muted)}
+
+  /* winner styling */
+  .pcard.winner{border-color:rgba(245,197,66,.55);
+    box-shadow:0 0 0 1px rgba(245,197,66,.25), 0 18px 50px -18px rgba(245,197,66,.45);}
+  .pcard.winner .totlvl{background:linear-gradient(180deg,#fff,var(--gold-bright) 55%,var(--gold));
+    -webkit-background-clip:text;background-clip:text;}
+  .crown{position:absolute;top:12px;width:30px;height:30px;color:var(--gold);
+    filter:drop-shadow(0 2px 6px rgba(245,197,66,.6));opacity:0;transform:translateY(-6px);
+    transition:opacity .4s ease,transform .4s ease}
+  .pcard.p1 .crown{right:14px}.pcard.p2 .crown{left:14px}
+  .pcard.winner .crown{opacity:1;transform:translateY(0)}
+
+  .vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:54px}
+  .vs .vtext{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(20px,4vw,34px);
+    color:var(--gold);text-shadow:0 0 18px rgba(245,197,66,.4)}
+  .vs .delta{font-size:11px;color:var(--muted);text-align:center;line-height:1.3}
+
+  /* ---------- Summary strip ---------- */
+  .summary{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 22px;
+  }
+  .chip{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:8px 15px;font-size:13px;font-weight:600;color:var(--txt)}
+  .chip b{font-family:'Cinzel',serif}
+  .chip .sw{width:9px;height:9px;border-radius:50%}
+  .chip .sw.p1{background:var(--p1)}.chip .sw.p2{background:var(--p2)}.chip .sw.t{background:var(--muted)}
+
+  /* ---------- Controls ---------- */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{background:none;border:none;color:var(--muted);font:inherit;font-weight:600;font-size:12.5px;
+    padding:7px 13px;border-radius:7px;cursor:pointer;transition:.15s}
+  .seg button.active{background:var(--panel-2);color:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+  .status{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
+  .status .live{width:8px;height:8px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 0 rgba(58,209,122,.5)}
+  .status.ok .live{background:var(--win);animation:pulse 2s infinite}
+  .status.err .live{background:var(--p2)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(58,209,122,.5)}70%{box-shadow:0 0 0 7px rgba(58,209,122,0)}100%{box-shadow:0 0 0 0 rgba(58,209,122,0)}}
+  .refresh{background:var(--panel);border:1px solid var(--line);color:var(--txt);font:inherit;font-weight:600;
+    font-size:12.5px;padding:8px 14px;border-radius:9px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px}
+  .refresh:hover{border-color:var(--gold);color:var(--gold-bright)}
+  .refresh svg{width:14px;height:14px}
+  .refresh.spin svg{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- Skill rows ---------- */
+  .legend{display:grid;grid-template-columns:1fr minmax(150px,200px) 1fr;align-items:center;
+    padding:0 6px 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .legend .l{text-align:right}.legend .c{text-align:center}.legend .r{text-align:left}
+  .legend .c span{color:var(--gold)}
+
+  .rows{display:flex;flex-direction:column;gap:7px}
+  .row{
+    display:grid;grid-template-columns:1fr minmax(150px,200px) 1fr;align-items:center;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:12px;padding:9px 12px;
+    transition:transform .18s ease,border-color .18s ease;
+  }
+  .row:hover{transform:translateY(-1px);border-color:#39414f}
+
+  .side{display:flex;align-items:center;gap:10px}
+  .side.left{flex-direction:row-reverse}
+  .lvl{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(17px,2.6vw,23px);
+    min-width:2.4ch;text-align:center;color:var(--muted);position:relative;transition:color .2s}
+  .bar{flex:1;height:14px;border-radius:7px;background:rgba(255,255,255,.05);overflow:hidden;position:relative;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  .fill{position:absolute;top:0;bottom:0;width:0;border-radius:7px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+  .left .fill{right:0;background:linear-gradient(90deg,transparent,var(--p1))}
+  .right .fill{left:0;background:linear-gradient(90deg,var(--p2),transparent)}
+
+  /* winner emphasis */
+  .side.win .lvl{color:var(--gold-bright)}
+  .side.win .lvl::after{content:"▲";position:absolute;font-size:.5em;color:var(--gold);
+    top:50%;transform:translateY(-50%)}
+  .side.left.win .lvl::after{left:-1.1em}
+  .side.right.win .lvl::after{right:-1.1em}
+  .left.win .fill{background:linear-gradient(90deg,rgba(245,197,66,.25),var(--gold));box-shadow:0 0 14px rgba(245,197,66,.45)}
+  .right.win .fill{background:linear-gradient(90deg,var(--gold),rgba(245,197,66,.25));box-shadow:0 0 14px rgba(245,197,66,.45)}
+  .side.lose .lvl{color:#5b6373}
+  .side.lose .fill{opacity:.5}
+
+  .skill{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 4px}
+  .skill img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+  .skill .nm{font-size:11.5px;font-weight:600;color:var(--txt);text-align:center;line-height:1.1}
+  .skill .gap{font-size:10px;color:var(--muted);font-weight:600}
+  .skill .gap.tie{color:var(--gold)}
+
+  /* overall row accent */
+  .row.overall{border-color:rgba(245,197,66,.4);background:linear-gradient(180deg,#221f17,#171821)}
+  .row.overall .skill .nm{color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:700}
+
+  footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px;line-height:1.7}
+  footer a{color:var(--p1-bright);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:560px){
+    .totals{grid-template-columns:1fr 1fr;gap:8px}
+    .vs{grid-column:1 / -1;order:-1;flex-direction:row;gap:14px;min-width:0}
+    .legend,.row{grid-template-columns:1fr 104px 1fr}
+    .skill img{width:22px;height:22px}
+    .skill .nm{font-size:10px}
+    .bar{height:11px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="title">
+    <div class="kicker">RuneScape 3 · Hiscores Duel</div>
+    <h1>ScarosZ <span style="color:var(--gold);-webkit-text-fill-color:var(--gold)">vs</span> Dux Daedalus</h1>
+    <div class="sub">Head-to-head skill comparison · live from the official RS3 hiscores</div>
+  </div>
+
+  <!-- Total level header -->
+  <div class="totals" id="totals"></div>
+
+  <!-- Summary -->
+  <div class="summary" id="summary"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="seg" id="sort">
+      <button data-sort="rs" class="active">RS order</button>
+      <button data-sort="gap">Biggest gap</button>
+      <button data-sort="lvl">Highest level</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="status" id="status"><span class="live"></span><span id="statusText">Loading…</span></div>
+      <button class="refresh" id="refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <div class="legend">
+    <div class="l">ScarosZ</div>
+    <div class="c"><span>Skill</span></div>
+    <div class="r">Dux Daedalus</div>
+  </div>
+  <div class="rows" id="rows"></div>
+
+  <footer>
+    <div id="asof"></div>
+    <div>Data: <a href="https://secure.runescape.com/m=hiscore/index_lite.ws?player=ScarosZ" target="_blank" rel="noopener">official RS3 hiscores</a> · normalised bars (level ÷ 99) · ▲ marks the higher skill</div>
+  </footer>
+
+</div>
+
+<script>
+/* ===== Skill order + icons (RS3, 29 skills) ===== */
+const SKILLS = [
+  "Attack","Defence","Strength","Constitution","Ranged","Prayer","Magic","Cooking",
+  "Woodcutting","Fletching","Fishing","Firemaking","Crafting","Smithing","Mining",
+  "Herblore","Agility","Thieving","Slayer","Farming","Runecrafting","Hunter",
+  "Construction","Summoning","Dungeoneering","Divination","Invention","Archaeology","Necromancy"
+];
+
+/* ===== Baked snapshot (fallback if live fetch is blocked) — 29 Jun 2026 =====
+   Each entry: [level, xp].  Index 0 = Overall, then the 29 skills above. */
+const SNAPSHOT = {
+  "ScarosZ":[
+    [1994,43708488],[71,866650],[90,5541481],[70,743229],[86,3905556],[70,738212],
+    [75,1226920],[75,1211033],[68,607600],[47,75569],[82,2472596],[66,496630],
+    [58,236363],[85,3336221],[85,3273112],[66,533904],[52,132829],[70,754401],
+    [61,316910],[60,278240],[74,1096994],[61,312242],[70,794751],[78,1744130],
+    [60,277271],[45,66016],[80,1999569],[10,12638],[88,4442168],[91,6215253]
+  ],
+  "Dux Daedalus":[
+    [1686,54102510],[65,479437],[89,5147942],[61,323336],[88,4717212],[60,277317],
+    [70,806519],[96,10684393],[56,191660],[57,208531],[44,59062],[54,160868],
+    [53,143505],[72,907286],[99,13431065],[99,13069364],[53,143463],[60,290685],
+    [58,235042],[62,353247],[46,72346],[62,338997],[50,106978],[78,1764570],
+    [44,60028],[48,90225],[39,33953],[1,0],[1,0],[21,5479]
+  ]
+};
+const SNAP_DATE = "29 Jun 2026";
+const PLAYERS = ["ScarosZ","Dux Daedalus"];
+const fmt = n => n.toLocaleString("en-GB");
+
+/* live data store, seeded with the snapshot */
+let DATA = JSON.parse(JSON.stringify(SNAPSHOT));
+let isLive = false, sortMode = "rs";
+
+/* ===== Live fetch via CORS proxies (RS hiscores has no CORS headers) ===== */
+const PROXIES = [
+  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
+  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
+  u => "https://thingproxy.freeboard.io/fetch/" + u
+];
+async function fetchPlayer(name){
+  const target = "https://secure.runescape.com/m=hiscore/index_lite.ws?player=" + encodeURIComponent(name);
+  for(const p of PROXIES){
+    try{
+      const res = await fetch(p(target), {cache:"no-store"});
+      if(!res.ok) continue;
+      const txt = (await res.text()).trim();
+      const lines = txt.split("\n").map(l=>l.trim()).filter(Boolean);
+      if(lines.length < 30 || /<html/i.test(txt)) continue;
+      const out = [];
+      for(let i=0;i<30;i++){
+        const parts = lines[i].split(",");
+        let lvl = parseInt(parts[1],10);
+        const xp = parseInt(parts[2],10);
+        if(isNaN(lvl)) lvl = 1;
+        out.push([lvl, isNaN(xp)?0:xp]);
+      }
+      return out;
+    }catch(e){/* try next proxy */}
+  }
+  return null;
+}
+
+async function refresh(){
+  const btn = document.getElementById("refresh");
+  const st  = document.getElementById("status");
+  const stt = document.getElementById("statusText");
+  btn.classList.add("spin"); st.className="status"; stt.textContent="Fetching live…";
+  const results = await Promise.all(PLAYERS.map(fetchPlayer));
+  btn.classList.remove("spin");
+  if(results.every(Boolean)){
+    PLAYERS.forEach((p,i)=>DATA[p]=results[i]);
+    isLive = true;
+    st.className="status ok"; stt.textContent="Live · just now";
+  }else{
+    isLive = false;
+    st.className="status err"; stt.textContent="Live blocked — showing "+SNAP_DATE+" snapshot";
+  }
+  render();
+}
+
+/* ===== Rendering ===== */
+const crownSVG = '<svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-1.5 11h-15L3 8z"/></svg>';
+
+function render(){
+  const p1=PLAYERS[0], p2=PLAYERS[1];
+  const o1=DATA[p1][0], o2=DATA[p2][0];
+
+  /* ---- totals ---- */
+  const t1Win = o1[0] >= o2[0];
+  document.getElementById("totals").innerHTML = `
+    <div class="pcard p1 ${o1[0]>o2[0]?'winner':''}">
+      ${crownSVG}
+      <div class="pname"><span class="dot"></span>${p1}</div>
+      <div class="label">Total Level</div>
+      <div class="totlvl">${fmt(o1[0])}</div>
+      <div class="totxp">${fmt(o1[1])} <span>total XP</span></div>
+    </div>
+    <div class="vs">
+      <div class="vtext">VS</div>
+      <div class="delta">${Math.abs(o1[0]-o2[0])} lvl gap</div>
+    </div>
+    <div class="pcard p2 ${o2[0]>o1[0]?'winner':''}">
+      ${crownSVG}
+      <div class="pname">${p2}<span class="dot"></span></div>
+      <div class="label">Total Level</div>
+      <div class="totlvl">${fmt(o2[0])}</div>
+      <div class="totxp">${fmt(o2[1])} <span>total XP</span></div>
+    </div>`;
+
+  /* ---- per-skill tally ---- */
+  let w1=0,w2=0,ties=0;
+  const rows = SKILLS.map((name,idx)=>{
+    const a=DATA[p1][idx+1], b=DATA[p2][idx+1];
+    const la=a[0], lb=b[0];
+    let win=0; // 1 = p1, 2 = p2, 0 = tie
+    if(la>lb) win=1; else if(lb>la) win=2;
+    else { // level tie → break on XP for the marker, but count as tie
+      if(a[1]>b[1]) win=1; else if(b[1]>a[1]) win=2;
+    }
+    const lvlTie = la===lb;
+    if(lvlTie) ties++; else if(la>lb) w1++; else w2++;
+    return {name,idx,la,lb,xa:a[1],xb:b[1],win,lvlTie,gap:Math.abs(la-lb)};
+  });
+
+  /* summary */
+  document.getElementById("summary").innerHTML = `
+    <div class="chip"><span class="sw p1"></span>ScarosZ leads <b>${w1}</b></div>
+    <div class="chip"><span class="sw t"></span>Ties <b>${ties}</b></div>
+    <div class="chip"><span class="sw p2"></span>Dux leads <b>${w2}</b></div>`;
+
+  /* sort */
+  let r=[...rows];
+  if(sortMode==="gap") r.sort((x,y)=>y.gap-x.gap);
+  else if(sortMode==="lvl") r.sort((x,y)=>Math.max(y.la,y.lb)-Math.max(x.la,x.lb));
+
+  const pct = l => Math.max(2, Math.min(100, l/99*100));
+  const cls = (side,win) => side==="left"
+     ? "side left "+(win===1?"win":win===2?"lose":"")
+     : "side right "+(win===2?"win":win===1?"lose":"");
+
+  /* overall row first — per-row normalised so the higher total is a full bar */
+  const oWin = o1[0]>o2[0]?1:o2[0]>o1[0]?2:0;
+  const oMax = Math.max(o1[0],o2[0],1);
+  const overall = `
+    <div class="row overall">
+      <div class="${cls('left',oWin)}">
+        <div class="lvl">${fmt(o1[0])}</div>
+        <div class="bar"><div class="fill" style="width:${o1[0]/oMax*100}%"></div></div>
+      </div>
+      <div class="skill"><div class="nm">Overall</div><div class="gap ${oWin===0?'tie':''}">${oWin===0?'tie':'Δ '+Math.abs(o1[0]-o2[0])}</div></div>
+      <div class="${cls('right',oWin)}">
+        <div class="lvl">${fmt(o2[0])}</div>
+        <div class="bar"><div class="fill" style="width:${o2[0]/oMax*100}%"></div></div>
+      </div>
+    </div>`;
+
+  const body = r.map(s=>`
+    <div class="row">
+      <div class="${cls('left',s.win)}">
+        <div class="lvl">${s.la}</div>
+        <div class="bar"><div class="fill" style="width:${pct(s.la)}%"></div></div>
+      </div>
+      <div class="skill">
+        <img src="icons/${s.name}.png" alt="${s.name}" loading="lazy">
+        <div class="nm">${s.name}</div>
+        <div class="gap ${s.lvlTie?'tie':''}">${s.lvlTie?'tie':'Δ '+s.gap}</div>
+      </div>
+      <div class="${cls('right',s.win)}">
+        <div class="lvl">${s.lb}</div>
+        <div class="bar"><div class="fill" style="width:${pct(s.lb)}%"></div></div>
+      </div>
+    </div>`).join("");
+
+  document.getElementById("rows").innerHTML = overall + body;
+
+  document.getElementById("asof").textContent =
+    isLive ? "Showing live hiscores data" : "Showing snapshot from "+SNAP_DATE+" (live fetch unavailable in this browser/network)";
+}
+
+/* sort buttons */
+document.getElementById("sort").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#sort button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); sortMode=b.dataset.sort; render();
+});
+document.getElementById("refresh").addEventListener("click",refresh);
+
+/* boot: show snapshot instantly, then try live */
+render();
+refresh();
+</script>
+</body>
+</html>

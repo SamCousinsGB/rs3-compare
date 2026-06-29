@@ -57,15 +57,15 @@
   /* ---------- Total-level header cards ---------- */
   .totals{
     display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(8px,1.6vw,18px);
-    align-items:stretch;margin-bottom:22px;
+    align-items:stretch;margin:34px 0 22px;
   }
   .pcard{
     position:relative;border:1px solid var(--line);border-radius:18px;
     background:linear-gradient(180deg,var(--panel-2),var(--panel));
-    padding:clamp(16px,2.6vw,26px);overflow:hidden;
+    padding:clamp(16px,2.6vw,26px);overflow:visible;
     transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
   }
-  .pcard::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+  .pcard::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;border-radius:18px;
     background:radial-gradient(120% 80% at 50% -20%, var(--accent-soft), transparent 70%);}
   .pcard.p1{--accent:var(--p1);--accent-soft:rgba(61,165,255,.18)}
   .pcard.p2{--accent:var(--p2);--accent-soft:rgba(255,107,74,.18)}
@@ -90,11 +90,16 @@
     box-shadow:0 0 0 1px rgba(245,197,66,.25), 0 18px 50px -18px rgba(245,197,66,.45);}
   .pcard.winner .totlvl{background:linear-gradient(180deg,#fff,var(--gold-bright) 55%,var(--gold));
     -webkit-background-clip:text;background-clip:text;}
-  .crown{position:absolute;top:12px;width:30px;height:30px;color:var(--gold);
-    filter:drop-shadow(0 2px 6px rgba(245,197,66,.6));opacity:0;transform:translateY(-6px);
-    transition:opacity .4s ease,transform .4s ease}
-  .pcard.p1 .crown{right:14px}.pcard.p2 .crown{left:14px}
-  .pcard.winner .crown{opacity:1;transform:translateY(0)}
+  .crown{position:absolute;top:-34px;left:50%;width:clamp(46px,7.4vw,62px);height:clamp(46px,7.4vw,62px);
+    color:var(--gold);transform-origin:bottom center;opacity:0;
+    transform:translateX(-50%) translateY(8px) scale(.55);pointer-events:none;
+    filter:drop-shadow(0 5px 12px rgba(245,197,66,.55)) drop-shadow(0 0 20px rgba(245,197,66,.4));
+    transition:opacity .55s ease,transform .55s cubic-bezier(.2,1.5,.4,1)}
+  .pcard.winner .crown{opacity:1;animation:crownFloat 3.4s ease-in-out infinite}
+  @keyframes crownFloat{
+    0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+    50%{transform:translateX(-50%) translateY(-5px) scale(1.025)}
+  }
 
   .vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:54px}
   .vs .vtext{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(20px,4vw,34px);
@@ -115,6 +120,16 @@
   .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.4vw,14px);margin-bottom:20px}
   .tile{position:relative;border:1px solid var(--line);border-radius:14px;
     background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:13px 12px 14px;text-align:center;overflow:hidden}
+  .tile .ticon{height:30px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+  .tile .ticon img{height:25px;width:auto;max-width:46px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
+  .tile.danger{border-color:rgba(226,59,50,.38)}
+  .tile.danger::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:14px;
+    background:radial-gradient(110% 70% at 50% 0%, rgba(226,59,50,.14), transparent 68%)}
+  .tile .ticon.danger img{height:30px;animation:skullPulse 2.4s ease-in-out infinite}
+  @keyframes skullPulse{
+    0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(226,59,50,.7))}
+    50%{transform:scale(1.1);filter:drop-shadow(0 0 13px rgba(255,60,46,1))}
+  }
   .tile .tlabel{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
   .tile .tsub{font-size:10px;color:#5e6675;margin-top:1px}
   .tvals{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:9px}
@@ -226,9 +241,9 @@
 <div class="wrap">
 
   <div class="title">
-    <div class="kicker">RuneScape 3 · Hiscores Duel</div>
+    <div class="kicker">Abyssal Sovereigns — Claim to Rule</div>
     <h1>ScarosZ <span style="color:var(--gold);-webkit-text-fill-color:var(--gold)">vs</span> Dux Daedalus</h1>
-    <div class="sub">Head-to-head skill comparison · live from the official RS3 hiscores</div>
+    <div class="sub">Head-to-head skill comparison of the Abyssal Sovereigns</div>
   </div>
 
   <!-- Total level header -->
@@ -268,10 +283,6 @@
   <h2 class="feedhead">Recent Activity</h2>
   <div class="feed" id="feed"></div>
 
-  <footer>
-    <div id="asof"></div>
-    <div>Data: <a href="https://secure.runescape.com/m=hiscore/index_lite.ws?player=ScarosZ" target="_blank" rel="noopener">RS3 hiscores</a> + <a href="https://apps.runescape.com/runemetrics/profile/profile?user=ScarosZ" target="_blank" rel="noopener">RuneMetrics</a> · combat level computed from skills · ▲ marks the higher value · bank value isn't exposed by any public API</div>
-  </footer>
 
 </div>
 
@@ -427,15 +438,28 @@ async function refresh(){
 }
 
 /* ===== Rendering ===== */
-const crownSVG = '<svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-1.5 11h-15L3 8z"/></svg>';
+const crownSVG = `<svg class="crown" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 47 L11 30 L18 42 L24 22 L28 40 L32 14 L36 40 L40 22 L46 42 L53 30 L59 47 Z"
+        fill="currentColor" stroke="#6e4f10" stroke-width=".8" stroke-linejoin="round"/>
+  <rect x="5" y="46" width="54" height="9.6" rx="3" fill="currentColor" stroke="#6e4f10" stroke-width=".8"/>
+  <path d="M6 50 H58" stroke="#fff3cf" stroke-width=".9" opacity=".4"/>
+  <g fill="#fff6d8"><circle cx="11" cy="30" r="2.8"/><circle cx="24" cy="22" r="2.8"/><circle cx="40" cy="22" r="2.8"/><circle cx="53" cy="30" r="2.8"/></g>
+  <g fill="#e23b32"><circle cx="14" cy="51" r="1.9"/><circle cx="23" cy="51" r="1.6"/><circle cx="32" cy="51" r="2.6"/><circle cx="41" cy="51" r="1.6"/><circle cx="50" cy="51" r="1.9"/></g>
+  <g fill="#ff9a90"><circle cx="13.3" cy="50.3" r=".6"/><circle cx="31.1" cy="50.1" r=".9"/><circle cx="49.3" cy="50.3" r=".6"/></g>
+  <circle cx="32" cy="31" r="2.7" fill="#e23b32"/><circle cx="31.1" cy="30.2" r=".9" fill="#ff9a90"/>
+  <circle cx="32" cy="12.3" r="3.5" fill="currentColor" stroke="#6e4f10" stroke-width=".8"/>
+  <rect x="30.5" y="1.6" width="3" height="10.8" rx="1.3" fill="currentColor" stroke="#6e4f10" stroke-width=".5"/>
+  <rect x="27.1" y="4.4" width="9.8" height="3" rx="1.3" fill="currentColor" stroke="#6e4f10" stroke-width=".5"/>
+</svg>`;
 
 /* one head-to-head stat tile */
-function statTile(label, sub, v1, v2, fmtFn){
+function statTile(label, sub, v1, v2, fmtFn, icon, danger){
   const w = v1>v2?1:v2>v1?2:0;
   const cell=(v,who,n,cls)=>`<div class="tv ${n} ${cls}">
        <div class="num">${fmtFn(v)}</div>
        <div class="who"><span class="sw"></span>${who}</div></div>`;
-  return `<div class="tile ${w===0?'tie':''}">
+  return `<div class="tile ${w===0?'tie':''} ${danger?'danger':''}">
+     <div class="ticon ${danger?'danger':''}"><img src="icons/${icon}" alt=""></div>
      <div class="tlabel">${label}</div>${sub?`<div class="tsub">${sub}</div>`:''}
      <div class="tvals">
        ${cell(v1,'Scaros','p1',w===1?'win':w===2?'lose':'')}
@@ -495,10 +519,10 @@ function render(){
   const cb1=combatLevel(DATA[p1]), cb2=combatLevel(DATA[p2]);
   const x1=XTRA[p1], x2=XTRA[p2];
   document.getElementById("tiles").innerHTML =
-      statTile("Total XP","", o1[1], o2[1], short)
-    + statTile("Combat Level","max 152", cb1, cb2, n=>n)
-    + statTile("Quest Points","of 472", x1.qp, x2.qp, n=>n)
-    + statTile("Quests Done","of 362", x1.qDone, x2.qDone, n=>n);
+      statTile("Total XP","", o1[1], o2[1], short, "ui-xp.png")
+    + statTile("Combat Level","max 152", cb1, cb2, n=>n, "ui-combat.png", true)
+    + statTile("Quest Points","of 472", x1.qp, x2.qp, n=>n, "ui-quest.png")
+    + statTile("Quests Done","of 362", x1.qDone, x2.qDone, n=>n, "ui-quest2.png");
 
   /* ---- activity feed ---- */
   const fcol=(p,n)=>`<div class="fcol ${n}">
@@ -552,9 +576,6 @@ function render(){
     </div>`).join("");
 
   document.getElementById("rows").innerHTML = overall + body;
-
-  document.getElementById("asof").textContent =
-    isLive ? "Showing live hiscores data" : "Showing snapshot from "+SNAP_DATE+" (live fetch unavailable in this browser/network)";
 }
 
 /* sort buttons */

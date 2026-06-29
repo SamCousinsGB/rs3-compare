@@ -111,6 +111,39 @@
   .chip .sw{width:9px;height:9px;border-radius:50%}
   .chip .sw.p1{background:var(--p1)}.chip .sw.p2{background:var(--p2)}.chip .sw.t{background:var(--muted)}
 
+  /* ---------- Headline stat tiles ---------- */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.4vw,14px);margin-bottom:20px}
+  .tile{position:relative;border:1px solid var(--line);border-radius:14px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:13px 12px 14px;text-align:center;overflow:hidden}
+  .tile .tlabel{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .tile .tsub{font-size:10px;color:#5e6675;margin-top:1px}
+  .tvals{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:9px}
+  .tv{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;flex:1}
+  .tv .num{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(17px,2.7vw,24px);line-height:1;color:#9aa3b4;white-space:nowrap}
+  .tv .who{display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .tv .who .sw{width:7px;height:7px;border-radius:50%}
+  .tv.p1 .who .sw{background:var(--p1)}.tv.p2 .who .sw{background:var(--p2)}
+  .tv.win .num{color:var(--gold-bright);text-shadow:0 0 16px rgba(245,197,66,.35)}
+  .tv.win .num::after{content:" ▲";font-size:.52em;color:var(--gold);vertical-align:middle}
+  .tv.lose .num{color:#5b6373}
+  .tcmp{font-family:'Cinzel',serif;font-weight:700;color:var(--muted);font-size:15px;opacity:.6}
+  .tile.tie::after{content:"TIE";position:absolute;top:9px;right:10px;font-size:8.5px;font-weight:800;
+    letter-spacing:.1em;color:var(--gold);opacity:.9}
+
+  /* ---------- Activity feed ---------- */
+  .feedhead{font-family:'Cinzel',serif;font-weight:700;color:var(--gold-bright);text-align:center;
+    font-size:clamp(15px,2.4vw,19px);margin:30px 0 14px;letter-spacing:.04em}
+  .feed{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1.6vw,16px)}
+  .fcol{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:14px 16px}
+  .fcol h3{display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;margin-bottom:10px}
+  .fcol.p1 h3{color:var(--p1-bright)}.fcol.p2 h3{color:var(--p2-bright)}
+  .fcol .dot{width:9px;height:9px;border-radius:50%}
+  .fcol.p1 .dot{background:var(--p1)}.fcol.p2 .dot{background:var(--p2)}
+  .act{display:flex;gap:10px;padding:7px 0;border-top:1px solid rgba(255,255,255,.05);font-size:12.5px}
+  .act:first-of-type{border-top:none}
+  .act .ad{color:var(--muted);font-weight:600;white-space:nowrap;font-size:11px;min-width:46px;padding-top:1px}
+  .act .at{color:var(--txt);line-height:1.35}
+
   /* ---------- Controls ---------- */
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
   .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
@@ -201,6 +234,9 @@
   <!-- Total level header -->
   <div class="totals" id="totals"></div>
 
+  <!-- Headline stat tiles: total xp, combat, quest points, quests done -->
+  <div class="tiles" id="tiles"></div>
+
   <!-- Summary -->
   <div class="summary" id="summary"></div>
 
@@ -228,9 +264,13 @@
   </div>
   <div class="rows" id="rows"></div>
 
+  <!-- Recent activity feed -->
+  <h2 class="feedhead">Recent Activity</h2>
+  <div class="feed" id="feed"></div>
+
   <footer>
     <div id="asof"></div>
-    <div>Data: <a href="https://secure.runescape.com/m=hiscore/index_lite.ws?player=ScarosZ" target="_blank" rel="noopener">official RS3 hiscores</a> · normalised bars (level ÷ 99) · ▲ marks the higher skill</div>
+    <div>Data: <a href="https://secure.runescape.com/m=hiscore/index_lite.ws?player=ScarosZ" target="_blank" rel="noopener">RS3 hiscores</a> + <a href="https://apps.runescape.com/runemetrics/profile/profile?user=ScarosZ" target="_blank" rel="noopener">RuneMetrics</a> · combat level computed from skills · ▲ marks the higher value · bank value isn't exposed by any public API</div>
   </footer>
 
 </div>
@@ -255,20 +295,54 @@ const SNAPSHOT = {
     [60,277271],[45,66016],[80,1999569],[10,12638],[88,4442168],[91,6215253]
   ],
   "Dux Daedalus":[
-    [1686,54102510],[65,479437],[89,5147942],[61,323336],[88,4717212],[60,277317],
-    [70,806519],[96,10684393],[56,191660],[57,208531],[44,59062],[54,160868],
+    [1687,54135223],[65,479437],[89,5147942],[61,323336],[88,4717212],[60,277317],
+    [70,806519],[97,10696693],[56,191660],[57,208531],[44,59062],[54,160868],
     [53,143505],[72,907286],[99,13431065],[99,13069364],[53,143463],[60,290685],
     [58,235042],[62,353247],[46,72346],[62,338997],[50,106978],[78,1764570],
     [44,60028],[48,90225],[39,33953],[1,0],[1,0],[21,5479]
   ]
 };
 const SNAP_DATE = "29 Jun 2026";
+
+/* Extra stats from the RuneMetrics API (quest points, quests, activity feed).
+   Baked snapshot; refreshed live via proxy when possible. Combat level is
+   computed from the live skills, so it always tracks the hiscores. */
+const EXTRA = {
+  "ScarosZ":{ qp:170, qDone:117, qStarted:10, acts:[
+    ["29 Jun","Levelled up Necromancy (91)"],
+    ["25 Jun","170 Quest Points obtained"],
+    ["25 Jun","Quest complete: Battle of Forinthry"],
+    ["25 Jun","Killed Zemouregal & Vorkath"],
+    ["25 Jun","Killed Hermod, the Spirit of War"],
+    ["25 Jun","Levelled up Runecrafting"]
+  ]},
+  "Dux Daedalus":{ qp:203, qDone:117, qStarted:18, acts:[
+    ["28 Jun","Levelled up Defence (89)"],
+    ["28 Jun","Levelled up Constitution (88)"],
+    ["27 Jun","Levelled up Defence"],
+    ["26 Jun","Levelled up Magic (97)"],
+    ["26 Jun","Levelled up Constitution"],
+    ["25 Jun","Levelled up Defence"]
+  ]}
+};
 const PLAYERS = ["ScarosZ","Dux Daedalus"];
 const fmt = n => n.toLocaleString("en-GB");
 
 /* live data store, seeded with the snapshot */
 let DATA = JSON.parse(JSON.stringify(SNAPSHOT));
+let XTRA = JSON.parse(JSON.stringify(EXTRA));
 let isLive = false, sortMode = "rs";
+
+/* RS3 combat level from the live skills (DATA[player]: [overall,...29 skills]).
+   idx: Att1 Def2 Str3 Con4 Rng5 Pra6 Mag7 ... Sum24 ... Nec29 */
+function combatLevel(arr){
+  const L=i=>arr[i][0];
+  const base=Math.max(L(1)+L(3), 2*L(7), 2*L(5), 2*L(29)); // melee | magic | ranged | necro
+  return Math.floor((L(2)+L(4)+Math.floor(L(6)/2)+Math.floor(L(24)/2)+1.3*base)/4);
+}
+/* compact number: 54,135,223 -> 54.1M */
+const short=n=> n>=1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,'')+"M"
+              : n>=1e3 ? Math.round(n/1e3)+"K" : ""+n;
 
 /* ===== Live fetch via CORS proxies (RS hiscores has no CORS headers) ===== */
 const PROXIES = [
@@ -299,26 +373,76 @@ async function fetchPlayer(name){
   return null;
 }
 
+/* fetch + parse JSON through the proxy chain (RuneMetrics has no CORS either) */
+async function proxyJSON(url){
+  for(const p of PROXIES){
+    try{
+      const r = await fetch(p(url), {cache:"no-store"});
+      if(!r.ok) continue;
+      return JSON.parse(await r.text());
+    }catch(e){/* next */}
+  }
+  return null;
+}
+const fmtDate = s => { const d=(s||"").split(" ")[0].split("-"); return d.length>=2 ? d[0]+" "+d[1] : (s||""); };
+
+/* RuneMetrics: quest points, quests done/started, recent activities */
+async function fetchExtra(name){
+  const prof = "https://apps.runescape.com/runemetrics/profile/profile?user="+encodeURIComponent(name)+"&activities=6";
+  const ques = "https://apps.runescape.com/runemetrics/quests?user="+encodeURIComponent(name);
+  const p = await proxyJSON(prof);
+  if(!p || typeof p.questscomplete!=="number") return null;
+  const out = {
+    qDone: p.questscomplete,
+    qStarted: p.questsstarted||0,
+    qp: (XTRA[name] && XTRA[name].qp) || 0,
+    acts: (p.activities||[]).map(a=>[fmtDate(a.date),(a.text||"").replace(/\s+/g," ").trim()])
+  };
+  const q = await proxyJSON(ques);
+  if(q && Array.isArray(q.quests))
+    out.qp = q.quests.reduce((s,x)=> s + (x.status==="COMPLETED" ? (x.questPoints||0) : 0), 0);
+  return out;
+}
+
 async function refresh(){
   const btn = document.getElementById("refresh");
   const st  = document.getElementById("status");
   const stt = document.getElementById("statusText");
   btn.classList.add("spin"); st.className="status"; stt.textContent="Fetching live…";
-  const results = await Promise.all(PLAYERS.map(fetchPlayer));
+  const [hs, ex] = await Promise.all([
+    Promise.all(PLAYERS.map(fetchPlayer)),
+    Promise.all(PLAYERS.map(n=>fetchExtra(n).catch(()=>null)))
+  ]);
   btn.classList.remove("spin");
-  if(results.every(Boolean)){
-    PLAYERS.forEach((p,i)=>DATA[p]=results[i]);
+  if(hs.every(Boolean)){
+    PLAYERS.forEach((p,i)=>DATA[p]=hs[i]);
     isLive = true;
     st.className="status ok"; stt.textContent="Live · just now";
   }else{
     isLive = false;
     st.className="status err"; stt.textContent="Live blocked — showing "+SNAP_DATE+" snapshot";
   }
+  ex.forEach((e,i)=>{ if(e) XTRA[PLAYERS[i]] = e; }); // extras update independently
   render();
 }
 
 /* ===== Rendering ===== */
 const crownSVG = '<svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-1.5 11h-15L3 8z"/></svg>';
+
+/* one head-to-head stat tile */
+function statTile(label, sub, v1, v2, fmtFn){
+  const w = v1>v2?1:v2>v1?2:0;
+  const cell=(v,who,n,cls)=>`<div class="tv ${n} ${cls}">
+       <div class="num">${fmtFn(v)}</div>
+       <div class="who"><span class="sw"></span>${who}</div></div>`;
+  return `<div class="tile ${w===0?'tie':''}">
+     <div class="tlabel">${label}</div>${sub?`<div class="tsub">${sub}</div>`:''}
+     <div class="tvals">
+       ${cell(v1,'Scaros','p1',w===1?'win':w===2?'lose':'')}
+       <div class="tcmp">${w===1?'›':w===2?'‹':'='}</div>
+       ${cell(v2,'Dux','p2',w===2?'win':w===1?'lose':'')}
+     </div></div>`;
+}
 
 function render(){
   const p1=PLAYERS[0], p2=PLAYERS[1];
@@ -366,6 +490,23 @@ function render(){
     <div class="chip"><span class="sw p1"></span>ScarosZ leads <b>${w1}</b></div>
     <div class="chip"><span class="sw t"></span>Ties <b>${ties}</b></div>
     <div class="chip"><span class="sw p2"></span>Dux leads <b>${w2}</b></div>`;
+
+  /* ---- headline stat tiles ---- */
+  const cb1=combatLevel(DATA[p1]), cb2=combatLevel(DATA[p2]);
+  const x1=XTRA[p1], x2=XTRA[p2];
+  document.getElementById("tiles").innerHTML =
+      statTile("Total XP","", o1[1], o2[1], short)
+    + statTile("Combat Level","max 152", cb1, cb2, n=>n)
+    + statTile("Quest Points","of 472", x1.qp, x2.qp, n=>n)
+    + statTile("Quests Done","of 362", x1.qDone, x2.qDone, n=>n);
+
+  /* ---- activity feed ---- */
+  const fcol=(p,n)=>`<div class="fcol ${n}">
+      <h3><span class="dot"></span>${p}</h3>
+      ${(XTRA[p].acts||[]).slice(0,6).map(a=>`<div class="act"><span class="ad">${a[0]}</span><span class="at">${a[1]}</span></div>`).join("")
+        || '<div class="act"><span class="at" style="color:var(--muted)">No recent activity</span></div>'}
+    </div>`;
+  document.getElementById("feed").innerHTML = fcol(p1,'p1') + fcol(p2,'p2');
 
   /* sort */
   let r=[...rows];

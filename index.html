@@ -235,15 +235,68 @@
     .skill .nm{font-size:10px}
     .bar{height:11px}
   }
+
+  .update-controls{display:flex;gap:10px;align-items:center;min-width:0}
+  .status{line-height:1.5;min-width:0}
+  .status .live{flex-shrink:0}
+  .update-note{font-size:12px;color:var(--muted);margin:-4px 0 18px;line-height:1.5}
+  .refresh{flex-shrink:0}
+  .refresh:disabled{cursor:wait;opacity:.65}
+  button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  .tv.lose .num,.side.lose .lvl{color:#a4adbc}
+  .tile .tsub{color:var(--muted);font-size:12px}
+  .tile .who,.tile .tlabel{font-size:11px}
+  .pcard,.fcol,.tile,.side{min-width:0}
+  .pcard .dot{flex-shrink:0}
+  .pcard.p2 .totlvl{text-align:right}
+  .act .ad{white-space:normal;flex:0 0 70px}
+  @media(max-width:700px){
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .controls{align-items:flex-start}
+    .update-controls{width:100%;justify-content:space-between}
+  }
+  @media(max-width:560px){
+    .pcard{padding:22px 10px 14px}
+    .tile{padding:13px 8px 14px}
+    .tvals{gap:4px}
+    .tv .num{font-size:clamp(15px,4.3vw,20px)}
+    .tv .who{font-size:10px;letter-spacing:0;gap:3px}
+    .pcard .pname{font-size:14px;gap:5px;min-height:36px}
+    .pcard .dot{width:7px;height:7px}
+    .pcard .totlvl{font-size:clamp(32px,9vw,48px)}
+    .pcard .totxp{font-size:12px;line-height:1.5}
+    .pcard .totxp span{display:block}
+    .vs{margin-bottom:22px}
+    .feed{grid-template-columns:1fr}
+    .legend,.row{grid-template-columns:minmax(0,1fr) 104px minmax(0,1fr)}
+    .row{padding:9px 10px}
+    .side{gap:5px}
+    .side .bar{display:none}
+    .side.left{justify-content:flex-start;padding-left:9px}
+    .side.right{justify-content:flex-start;padding-right:9px}
+    .legend{font-size:10px;letter-spacing:.04em}
+    .skill .nm{font-size:12px}
+    .skill .gap{font-size:11px}
+    .summary{gap:6px}
+    .chip{padding:7px 9px;font-size:12px;gap:5px}
+    .seg{width:100%;display:flex}
+    .seg button{flex:1;padding:9px 6px;font-size:12px;min-height:40px}
+    .refresh{min-height:40px;padding:8px 10px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  @media(max-width:360px){
+    .tcmp{display:none}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="title">
-    <div class="kicker">Abyssal Sovereigns — Claim to Rule</div>
     <h1>ScarosZ <span style="color:var(--gold);-webkit-text-fill-color:var(--gold)">vs</span> Dux Daedalus</h1>
-    <div class="sub">Head-to-head skill comparison of the Abyssal Sovereigns</div>
+    <div class="sub">RuneScape 3 player comparison</div>
   </div>
 
   <!-- Total level header -->
@@ -262,14 +315,16 @@
       <button data-sort="gap">Biggest gap</button>
       <button data-sort="lvl">Highest level</button>
     </div>
-    <div style="display:flex;gap:10px;align-items:center">
-      <div class="status" id="status"><span class="live"></span><span id="statusText">Loading…</span></div>
+    <div class="update-controls">
+      <div class="status" id="status" role="status" aria-live="polite"><span class="live"></span><span id="statusText">Loading…</span></div>
       <button class="refresh" id="refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         Refresh
       </button>
     </div>
   </div>
+
+  <p class="update-note">Data updates hourly. Refresh loads the latest published update.</p>
 
   <!-- Skills -->
   <div class="legend">
@@ -295,54 +350,10 @@ const SKILLS = [
   "Construction","Summoning","Dungeoneering","Divination","Invention","Archaeology","Necromancy"
 ];
 
-/* ===== Baked snapshot (fallback if live fetch is blocked) — 29 Jun 2026 =====
-   Each entry: [level, xp].  Index 0 = Overall, then the 29 skills above. */
-const SNAPSHOT = {
-  "ScarosZ":[
-    [1994,43708488],[71,866650],[90,5541481],[70,743229],[86,3905556],[70,738212],
-    [75,1226920],[75,1211033],[68,607600],[47,75569],[82,2472596],[66,496630],
-    [58,236363],[85,3336221],[85,3273112],[66,533904],[52,132829],[70,754401],
-    [61,316910],[60,278240],[74,1096994],[61,312242],[70,794751],[78,1744130],
-    [60,277271],[45,66016],[80,1999569],[10,12638],[88,4442168],[91,6215253]
-  ],
-  "Dux Daedalus":[
-    [1687,54135223],[65,479437],[89,5147942],[61,323336],[88,4717212],[60,277317],
-    [70,806519],[97,10696693],[56,191660],[57,208531],[44,59062],[54,160868],
-    [53,143505],[72,907286],[99,13431065],[99,13069364],[53,143463],[60,290685],
-    [58,235042],[62,353247],[46,72346],[62,338997],[50,106978],[78,1764570],
-    [44,60028],[48,90225],[39,33953],[1,0],[1,0],[21,5479]
-  ]
-};
-const SNAP_DATE = "29 Jun 2026";
-
-/* Extra stats from the RuneMetrics API (quest points, quests, activity feed).
-   Baked snapshot; refreshed live via proxy when possible. Combat level is
-   computed from the live skills, so it always tracks the hiscores. */
-const EXTRA = {
-  "ScarosZ":{ qp:170, qDone:117, qStarted:10, acts:[
-    ["29 Jun","Levelled up Necromancy (91)"],
-    ["25 Jun","170 Quest Points obtained"],
-    ["25 Jun","Quest complete: Battle of Forinthry"],
-    ["25 Jun","Killed Zemouregal & Vorkath"],
-    ["25 Jun","Killed Hermod, the Spirit of War"],
-    ["25 Jun","Levelled up Runecrafting"]
-  ]},
-  "Dux Daedalus":{ qp:203, qDone:117, qStarted:18, acts:[
-    ["28 Jun","Levelled up Defence (89)"],
-    ["28 Jun","Levelled up Constitution (88)"],
-    ["27 Jun","Levelled up Defence"],
-    ["26 Jun","Levelled up Magic (97)"],
-    ["26 Jun","Levelled up Constitution"],
-    ["25 Jun","Levelled up Defence"]
-  ]}
-};
-const PLAYERS = ["ScarosZ","Dux Daedalus"];
+const PLAYERS = ["ScarosZ", "Dux Daedalus"];
 const fmt = n => n.toLocaleString("en-GB");
-
-/* live data store, seeded with the snapshot */
-let DATA = JSON.parse(JSON.stringify(SNAPSHOT));
-let XTRA = JSON.parse(JSON.stringify(EXTRA));
-let isLive = false, sortMode = "rs";
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let DATA = {}, XTRA = {}, sortMode = "rs", updatedAt = null, refreshing = false;
 
 /* RS3 combat level from the live skills (DATA[player]: [overall,...29 skills]).
    idx: Att1 Def2 Str3 Con4 Rng5 Pra6 Mag7 ... Sum24 ... Nec29 */
@@ -355,86 +366,46 @@ function combatLevel(arr){
 const short=n=> n>=1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,'')+"M"
               : n>=1e3 ? Math.round(n/1e3)+"K" : ""+n;
 
-/* ===== Live fetch via CORS proxies (RS hiscores has no CORS headers) ===== */
-const PROXIES = [
-  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
-  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
-  u => "https://thingproxy.freeboard.io/fetch/" + u
-];
-async function fetchPlayer(name){
-  const target = "https://secure.runescape.com/m=hiscore/index_lite.ws?player=" + encodeURIComponent(name);
-  for(const p of PROXIES){
-    try{
-      const res = await fetch(p(target), {cache:"no-store"});
-      if(!res.ok) continue;
-      const txt = (await res.text()).trim();
-      const lines = txt.split("\n").map(l=>l.trim()).filter(Boolean);
-      if(lines.length < 30 || /<html/i.test(txt)) continue;
-      const out = [];
-      for(let i=0;i<30;i++){
-        const parts = lines[i].split(",");
-        let lvl = parseInt(parts[1],10);
-        const xp = parseInt(parts[2],10);
-        if(isNaN(lvl)) lvl = 1;
-        out.push([lvl, isNaN(xp)?0:xp]);
-      }
-      return out;
-    }catch(e){/* try next proxy */}
+/* Data is fetched directly from RuneScape by the hourly Pages workflow. */
+function validateSnapshot(snapshot){
+  if(!snapshot || !Number.isFinite(Date.parse(snapshot.updatedAt))) throw new Error("Invalid update date");
+  for(const name of PLAYERS){
+    const player = snapshot.players?.[name];
+    if(!player || !Array.isArray(player.skills) || player.skills.length !== 30 ||
+      player.skills.some(row => !Array.isArray(row) || row.length !== 2 || row.some(n => !Number.isSafeInteger(n) || n < 0)) ||
+      !player.extra || ['qp','qpTotal','qDone','qTotal'].some(key => !Number.isSafeInteger(player.extra[key]) || player.extra[key] < 0) ||
+      !Array.isArray(player.extra.acts) || player.extra.acts.some(a => !Array.isArray(a) || a.length !== 2 || a.some(v => typeof v !== 'string')))
+      throw new Error("Incomplete player data");
   }
-  return null;
+  return snapshot;
 }
-
-/* fetch + parse JSON through the proxy chain (RuneMetrics has no CORS either) */
-async function proxyJSON(url){
-  for(const p of PROXIES){
-    try{
-      const r = await fetch(p(url), {cache:"no-store"});
-      if(!r.ok) continue;
-      return JSON.parse(await r.text());
-    }catch(e){/* next */}
-  }
-  return null;
+function dataDate(){
+  return new Date(updatedAt).toLocaleString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZoneName:'short'});
 }
-const fmtDate = s => { const d=(s||"").split(" ")[0].split("-"); return d.length>=2 ? d[0]+" "+d[1] : (s||""); };
-
-/* RuneMetrics: quest points, quests done/started, recent activities */
-async function fetchExtra(name){
-  const prof = "https://apps.runescape.com/runemetrics/profile/profile?user="+encodeURIComponent(name)+"&activities=6";
-  const ques = "https://apps.runescape.com/runemetrics/quests?user="+encodeURIComponent(name);
-  const p = await proxyJSON(prof);
-  if(!p || typeof p.questscomplete!=="number") return null;
-  const out = {
-    qDone: p.questscomplete,
-    qStarted: p.questsstarted||0,
-    qp: (XTRA[name] && XTRA[name].qp) || 0,
-    acts: (p.activities||[]).map(a=>[fmtDate(a.date),(a.text||"").replace(/\s+/g," ").trim()])
-  };
-  const q = await proxyJSON(ques);
-  if(q && Array.isArray(q.quests))
-    out.qp = q.quests.reduce((s,x)=> s + (x.status==="COMPLETED" ? (x.questPoints||0) : 0), 0);
-  return out;
-}
-
 async function refresh(){
-  const btn = document.getElementById("refresh");
-  const st  = document.getElementById("status");
-  const stt = document.getElementById("statusText");
-  btn.classList.add("spin"); st.className="status"; stt.textContent="Fetching live…";
-  const [hs, ex] = await Promise.all([
-    Promise.all(PLAYERS.map(fetchPlayer)),
-    Promise.all(PLAYERS.map(n=>fetchExtra(n).catch(()=>null)))
-  ]);
-  btn.classList.remove("spin");
-  if(hs.every(Boolean)){
-    PLAYERS.forEach((p,i)=>DATA[p]=hs[i]);
-    isLive = true;
-    st.className="status ok"; stt.textContent="Live · just now";
-  }else{
-    isLive = false;
-    st.className="status err"; stt.textContent="Live blocked — showing "+SNAP_DATE+" snapshot";
+  if(refreshing) return;
+  refreshing = true;
+  const btn = document.getElementById("refresh"), st = document.getElementById("status"), stt = document.getElementById("statusText");
+  btn.disabled = true; btn.classList.add("spin"); st.className="status";
+  stt.textContent = updatedAt ? "Checking for updates…" : "Loading stats…";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch('data/players.json', {cache:'no-store', signal:controller.signal});
+    if(!response.ok) throw new Error('Data unavailable');
+    const snapshot = validateSnapshot(await response.json());
+    for(const name of PLAYERS){ DATA[name] = snapshot.players[name].skills; XTRA[name] = snapshot.players[name].extra; }
+    updatedAt = snapshot.updatedAt;
+    render();
+    const stale = Date.now() - Date.parse(updatedAt) > 3 * 60 * 60 * 1000;
+    st.className = stale ? 'status err' : 'status ok';
+    stt.textContent = (stale ? 'Update delayed · Last fetched ' : 'Fetched ') + dataDate();
+  } catch(error) {
+    st.className = 'status err';
+    stt.textContent = updatedAt ? 'Refresh failed · Showing data fetched ' + dataDate() : 'Stats unavailable. Please try Refresh.';
+  } finally {
+    clearTimeout(timer); refreshing = false; btn.disabled = false; btn.classList.remove('spin');
   }
-  ex.forEach((e,i)=>{ if(e) XTRA[PLAYERS[i]] = e; }); // extras update independently
-  render();
 }
 
 /* ===== Rendering ===== */
@@ -469,6 +440,7 @@ function statTile(label, sub, v1, v2, fmtFn, icon, danger){
 }
 
 function render(){
+  if(!updatedAt) return;
   const p1=PLAYERS[0], p2=PLAYERS[1];
   const o1=DATA[p1][0], o2=DATA[p2][0];
 
@@ -501,9 +473,6 @@ function render(){
     const la=a[0], lb=b[0];
     let win=0; // 1 = p1, 2 = p2, 0 = tie
     if(la>lb) win=1; else if(lb>la) win=2;
-    else { // level tie → break on XP for the marker, but count as tie
-      if(a[1]>b[1]) win=1; else if(b[1]>a[1]) win=2;
-    }
     const lvlTie = la===lb;
     if(lvlTie) ties++; else if(la>lb) w1++; else w2++;
     return {name,idx,la,lb,xa:a[1],xb:b[1],win,lvlTie,gap:Math.abs(la-lb)};
@@ -521,13 +490,13 @@ function render(){
   document.getElementById("tiles").innerHTML =
       statTile("Total XP","", o1[1], o2[1], short, "ui-xp.png")
     + statTile("Combat Level","max 152", cb1, cb2, n=>n, "ui-combat.png", true)
-    + statTile("Quest Points","of 472", x1.qp, x2.qp, n=>n, "ui-quest.png")
-    + statTile("Quests Done","of 362", x1.qDone, x2.qDone, n=>n, "ui-quest2.png");
+    + statTile("Quest Points",x1.qpTotal===x2.qpTotal ? "of "+x1.qpTotal : "", x1.qp, x2.qp, n=>n, "ui-quest.png")
+    + statTile("Quests Done",x1.qTotal===x2.qTotal ? "of "+x1.qTotal : "", x1.qDone, x2.qDone, n=>n, "ui-quest2.png");
 
   /* ---- activity feed ---- */
   const fcol=(p,n)=>`<div class="fcol ${n}">
       <h3><span class="dot"></span>${p}</h3>
-      ${(XTRA[p].acts||[]).slice(0,6).map(a=>`<div class="act"><span class="ad">${a[0]}</span><span class="at">${a[1]}</span></div>`).join("")
+      ${(XTRA[p].acts||[]).slice(0,6).map(a=>`<div class="act"><span class="ad">${escapeHTML(a[0])}</span><span class="at">${escapeHTML(a[1])}</span></div>`).join("")
         || '<div class="act"><span class="at" style="color:var(--muted)">No recent activity</span></div>'}
     </div>`;
   document.getElementById("feed").innerHTML = fcol(p1,'p1') + fcol(p2,'p2');
@@ -586,8 +555,7 @@ document.getElementById("sort").addEventListener("click",e=>{
 });
 document.getElementById("refresh").addEventListener("click",refresh);
 
-/* boot: show snapshot instantly, then try live */
-render();
+/* Load the latest published data. */
 refresh();
 </script>
 </body>

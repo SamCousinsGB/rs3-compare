@@ -2,7 +2,7 @@
 
 Compares ScarosZ and Dux Daedalus using RuneScape hiscores and RuneMetrics.
 
-GitHub Actions fetches both players directly from RuneScape on pushes to `master`, manual runs, and hourly at minute 17. It validates the responses and deploys the site through GitHub Pages. If any source fails, deployment stops and the last successful site stays published. Scheduled runs may be delayed by GitHub.
+GitHub Actions fetches both players directly from RuneScape on pushes to `master`, manual runs, and hourly at minute 17. It validates the responses and deploys the site through GitHub Pages. When a player's hiscores return HTTP 404, the update uses their RuneMetrics profile's complete set of 29 skills instead, ordered by skill ID and converted from tenths of XP to whole XP. Other request errors or invalid data stop deployment, and the last successful site stays published. Scheduled runs may be delayed by GitHub.
 
 The browser reads `data/players.json` from this site. Refresh reloads the latest published data; it does not trigger a new upstream fetch. The page displays the fetch timestamp and flags data older than three hours. Requests time out after ten seconds, and failed refreshes retain the data already displayed.
 

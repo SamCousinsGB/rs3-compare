@@ -34,12 +34,24 @@ export function parseRuneMetricsSkills(profile) {
   return [[profile.totalskill, profile.totalxp], ...Array.from({ length: 29 }, (_, id) => skills.get(id))];
 }
 
-export function parseExtra(profile, response) {
-  if (!Number.isInteger(profile.questscomplete) || !Array.isArray(profile.activities) || !Array.isArray(response.quests) || !response.quests.length) {
+export function validateProfileExtras(profile) {
+  if (!profile || ['questscomplete', 'questsstarted', 'questsnotstarted'].some(key => !Number.isSafeInteger(profile[key]) || profile[key] < 0) || !Array.isArray(profile.activities)) {
     throw new Error('Incomplete RuneMetrics response');
   }
+  if (profile.activities.some(activity => !activity || typeof activity !== 'object')) throw new Error('Invalid activity data');
+  return profile;
+}
+
+export function validateQuests(response) {
+  if (!response || !Array.isArray(response.quests) || !response.quests.length) throw new Error('Incomplete RuneMetrics response');
+  if (response.quests.some(q => !q || !Number.isSafeInteger(q.questPoints) || q.questPoints < 0 || typeof q.status !== 'string')) throw new Error('Invalid quest data');
+  return response;
+}
+
+export function parseExtra(profile, response) {
+  validateProfileExtras(profile);
+  validateQuests(response);
   const quests = response.quests;
-  if (quests.some(q => !Number.isInteger(q.questPoints) || q.questPoints < 0 || typeof q.status !== 'string')) throw new Error('Invalid quest data');
   return {
     qp: quests.reduce((sum, q) => sum + (q.status === 'COMPLETED' ? q.questPoints : 0), 0),
     qpTotal: quests.reduce((sum, q) => sum + q.questPoints, 0),

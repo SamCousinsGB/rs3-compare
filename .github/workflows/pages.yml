@@ -28,14 +28,21 @@ jobs:
         with:
           node-version: '24'
       - run: npm test
-      - run: npm run update
-      - run: |
+      - name: Refresh RuneScape stats
+        id: stats
+        run: npm run update -- --defer-on-outage
+      - name: Stage site with fresh stats
+        if: steps.stats.outputs.updated == 'true'
+        run: |
           mkdir _site
           cp index.html _site/
           cp -r icons data _site/
       - uses: actions/configure-pages@v5
+        if: steps.stats.outputs.updated == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.stats.outputs.updated == 'true'
         with:
           path: _site
       - uses: actions/deploy-pages@v4
+        if: steps.stats.outputs.updated == 'true'
         id: deployment

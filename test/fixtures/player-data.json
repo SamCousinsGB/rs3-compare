@@ -1,0 +1,137 @@
+{
+  "name": "Example Player",
+  "skills": {
+    "necromancy": {
+      "level": 29,
+      "fine_xp": 12625
+    },
+    "archaeology": {
+      "level": 28,
+      "fine_xp": 12615
+    },
+    "invention": {
+      "level": 27,
+      "fine_xp": 12605
+    },
+    "divination": {
+      "level": 26,
+      "fine_xp": 12595
+    },
+    "dungeoneering": {
+      "level": 25,
+      "fine_xp": 12585
+    },
+    "summoning": {
+      "level": 24,
+      "fine_xp": 12575
+    },
+    "construction": {
+      "level": 23,
+      "fine_xp": 12565
+    },
+    "hunter": {
+      "level": 22,
+      "fine_xp": 12555
+    },
+    "runecraft": {
+      "level": 21,
+      "fine_xp": 12545
+    },
+    "farming": {
+      "level": 20,
+      "fine_xp": 12535
+    },
+    "slayer": {
+      "level": 19,
+      "fine_xp": 12525
+    },
+    "thieving": {
+      "level": 18,
+      "fine_xp": 12515
+    },
+    "agility": {
+      "level": 17,
+      "fine_xp": 12505
+    },
+    "herblore": {
+      "level": 16,
+      "fine_xp": 12495
+    },
+    "mining": {
+      "level": 15,
+      "fine_xp": 12485
+    },
+    "smithing": {
+      "level": 14,
+      "fine_xp": 12475
+    },
+    "crafting": {
+      "level": 13,
+      "fine_xp": 12465
+    },
+    "firemaking": {
+      "level": 12,
+      "fine_xp": 12455
+    },
+    "fishing": {
+      "level": 11,
+      "fine_xp": 12445
+    },
+    "fletching": {
+      "level": 10,
+      "fine_xp": 12435
+    },
+    "woodcutting": {
+      "level": 9,
+      "fine_xp": 12425
+    },
+    "cooking": {
+      "level": 8,
+      "fine_xp": 12415
+    },
+    "magic": {
+      "level": 7,
+      "fine_xp": 12405
+    },
+    "prayer": {
+      "level": 6,
+      "fine_xp": 12395
+    },
+    "ranged": {
+      "level": 5,
+      "fine_xp": 12385
+    },
+    "hitpoints": {
+      "level": 4,
+      "fine_xp": 12375
+    },
+    "strength": {
+      "level": 3,
+      "fine_xp": 12365
+    },
+    "defence": {
+      "level": 2,
+      "fine_xp": 12355
+    },
+    "attack": {
+      "level": 1,
+      "fine_xp": 12345
+    }
+  },
+  "quests": {
+    "1": {
+      "status": "COMPLETED",
+      "qp": 3
+    },
+    "2": {
+      "status": "STARTED",
+      "qp": 2
+    },
+    "3": {
+      "status": "NOT_STARTED",
+      "qp": 1
+    }
+  },
+  "qp": 7,
+  "qp_max": 500
+}

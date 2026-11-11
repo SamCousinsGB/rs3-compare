@@ -1,62 +1,63 @@
 export const PLAYERS = ['ScarosZ', 'Dux Daedalus'];
 
-export function parseHiscores(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 30) throw new Error('Incomplete hiscores response');
-  return lines.slice(0, 30).map((line, index) => {
-    const parts = line.split(',').map(Number);
-    if (parts.length !== 3 || parts.some(n => !Number.isSafeInteger(n)) || parts[1] < 1 || parts[2] < 0 || (index > 0 && parts[1] > 120)) {
-      throw new Error('Invalid hiscores response');
+// Platform API names in the same skill order used by the comparison page.
+export const SKILL_KEYS = [
+  'attack', 'defence', 'strength', 'hitpoints', 'ranged', 'prayer', 'magic',
+  'cooking', 'woodcutting', 'fletching', 'fishing', 'firemaking', 'crafting',
+  'smithing', 'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming',
+  'runecraft', 'hunter', 'construction', 'summoning', 'dungeoneering',
+  'divination', 'invention', 'archaeology', 'necromancy'
+];
+
+const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const nonnegativeInteger = value => Number.isSafeInteger(value) && value >= 0;
+
+export function parsePlayerData(response) {
+  if (!isObject(response) || typeof response.name !== 'string' || !response.name.trim() ||
+      !isObject(response.skills) || Object.keys(response.skills).length !== SKILL_KEYS.length) {
+    throw new Error('Incomplete Platform API player data');
+  }
+  const skills = SKILL_KEYS.map(name => {
+    const skill = response.skills[name];
+    if (!isObject(skill) || !Number.isInteger(skill.level) || skill.level < 1 || skill.level > 120 || !nonnegativeInteger(skill.fine_xp)) {
+      throw new Error('Invalid Platform API skill: ' + name);
     }
-    return parts.slice(1);
+    return [skill.level, Math.floor(skill.fine_xp / 10)];
   });
-}
+  const total = skills.reduce(([levels, xp], skill) => [levels + skill[0], xp + skill[1]], [0, 0]);
+  if (!total.every(nonnegativeInteger)) throw new Error('Invalid Platform API skill totals');
 
-export function parseRuneMetricsSkills(profile) {
-  if (!Number.isSafeInteger(profile.totalskill) || profile.totalskill < 29 ||
-      !Number.isSafeInteger(profile.totalxp) || profile.totalxp < 0 ||
-      !Array.isArray(profile.skillvalues) || profile.skillvalues.length !== 29) {
-    throw new Error('Incomplete RuneMetrics skills');
+  if (!nonnegativeInteger(response.qp) || !nonnegativeInteger(response.qp_max) || response.qp > response.qp_max ||
+      !isObject(response.quests) || !Object.keys(response.quests).length) {
+    throw new Error('Incomplete Platform API quest data');
   }
-  const skills = new Map();
-  for (const skill of profile.skillvalues) {
-    if (!skill || !Number.isInteger(skill.id) || skill.id < 0 || skill.id > 28 ||
-        skills.has(skill.id) || !Number.isInteger(skill.level) || skill.level < 1 || skill.level > 120 ||
-        !Number.isSafeInteger(skill.xp) || skill.xp < 0) {
-      throw new Error('Invalid RuneMetrics skills');
-    }
-    // RuneMetrics supplies skill XP in tenths; overall totalxp is already whole XP.
-    skills.set(skill.id, [skill.level, Math.floor(skill.xp / 10)]);
+  const quests = Object.values(response.quests);
+  if (quests.some(quest => !isObject(quest) || !nonnegativeInteger(quest.qp) || !['NOT_STARTED', 'STARTED', 'COMPLETED'].includes(quest.status))) {
+    throw new Error('Invalid Platform API quest data');
   }
-  if ([...skills.values()].reduce((total, [level]) => total + level, 0) !== profile.totalskill) {
-    throw new Error('Inconsistent RuneMetrics total level');
-  }
-  return [[profile.totalskill, profile.totalxp], ...Array.from({ length: 29 }, (_, id) => skills.get(id))];
-}
-
-export function validateProfileExtras(profile) {
-  if (!profile || ['questscomplete', 'questsstarted', 'questsnotstarted'].some(key => !Number.isSafeInteger(profile[key]) || profile[key] < 0) || !Array.isArray(profile.activities)) {
-    throw new Error('Incomplete RuneMetrics response');
-  }
-  if (profile.activities.some(activity => !activity || typeof activity !== 'object')) throw new Error('Invalid activity data');
-  return profile;
-}
-
-export function validateQuests(response) {
-  if (!response || !Array.isArray(response.quests) || !response.quests.length) throw new Error('Incomplete RuneMetrics response');
-  if (response.quests.some(q => !q || !Number.isSafeInteger(q.questPoints) || q.questPoints < 0 || typeof q.status !== 'string')) throw new Error('Invalid quest data');
-  return response;
-}
-
-export function parseExtra(profile, response) {
-  validateProfileExtras(profile);
-  validateQuests(response);
-  const quests = response.quests;
   return {
-    qp: quests.reduce((sum, q) => sum + (q.status === 'COMPLETED' ? q.questPoints : 0), 0),
-    qpTotal: quests.reduce((sum, q) => sum + q.questPoints, 0),
-    qDone: profile.questscomplete,
-    qTotal: profile.questscomplete + profile.questsstarted + profile.questsnotstarted,
-    acts: profile.activities.slice(0, 6).map(a => [String(a.date || '').split(' ')[0].replaceAll('-', ' '), String(a.text || '').replace(/\s+/g, ' ').trim()])
+    skills: [total, ...skills],
+    extra: {
+      // Jagex's totals include special quest rules; summing quest rewards is incorrect.
+      qp: response.qp,
+      qpTotal: response.qp_max,
+      qDone: quests.filter(quest => quest.status === 'COMPLETED').length,
+      qTotal: quests.length
+    }
   };
+}
+
+const eventDate = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
+});
+
+export function parsePlayerEvents(response) {
+  if (!isObject(response) || typeof response.name !== 'string' || !response.name.trim() || !Array.isArray(response.events)) {
+    throw new Error('Incomplete Platform API events');
+  }
+  if (response.events.some(event => !isObject(event) || typeof event.text !== 'string' || typeof event.date !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(event.date) || !Number.isFinite(Date.parse(event.date)))) {
+    throw new Error('Invalid Platform API event');
+  }
+  return response.events.slice(0, 6).map(event => [eventDate.format(new Date(event.date)), event.text.replace(/\s+/g, ' ').trim()]);
 }

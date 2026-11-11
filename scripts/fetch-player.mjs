@@ -1,4 +1,4 @@
-import { parseHiscores, parseRuneMetricsSkills, parseExtra, validateProfileExtras, validateQuests } from './data.mjs';
+import { parsePlayerData, parsePlayerEvents } from './data.mjs';
 import { setTimeout as delay } from 'node:timers/promises';
 
 export class UpstreamUnavailableError extends Error {
@@ -22,14 +22,17 @@ export async function allOrThrow(promises) {
   return results.map(result => result.value);
 }
 
-async function request(url, json, fetchImpl, wait) {
+async function request(url, fetchImpl, wait) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await fetchImpl(url, { signal: AbortSignal.timeout(15000) });
+      const response = await fetchImpl(url, {
+        headers: { 'User-Agent': 'rs3-compare/1.0 (+https://github.com/SamCousinsGB/rs3-compare)', Accept: 'application/json' },
+        signal: AbortSignal.timeout(15000)
+      });
       if (!response.ok) {
         throw Object.assign(new Error(`RuneScape returned HTTP ${response.status} for ${url}`), { status: response.status });
       }
-      return json ? await response.json() : await response.text();
+      return await response.json();
     } catch (e) {
       if (!isTransient(e)) throw e;
       if (attempt === 2) throw new UpstreamUnavailableError(e);
@@ -40,22 +43,10 @@ async function request(url, json, fetchImpl, wait) {
 
 export async function fetchPlayer(name, fetchImpl = fetch, wait = delay) {
   const user = encodeURIComponent(name);
-  const hiscoresRequest = request(`https://secure.runescape.com/m=hiscore/index_lite.ws?player=${user}`, false, fetchImpl, wait)
-    .then(parseHiscores)
-    .catch(error => { if (error.status === 404) return null; throw error; });
-  const profileRequest = request(`https://apps.runescape.com/runemetrics/profile/profile?user=${user}&activities=6`, true, fetchImpl, wait)
-    .then(validateProfileExtras);
-  const questsRequest = request(`https://apps.runescape.com/runemetrics/quests?user=${user}`, true, fetchImpl, wait)
-    .then(validateQuests);
-  const skillsRequest = allOrThrow([hiscoresRequest, profileRequest]).then(([hiscores, profile]) => {
-    if (hiscores !== null) return hiscores;
-    const skills = parseRuneMetricsSkills(profile);
-    console.warn(`Hiscores unavailable for ${name}; using validated RuneMetrics skills.`);
-    return skills;
-  });
-  const [skills, profile, quests] = await allOrThrow([
-    skillsRequest, profileRequest, questsRequest
+  const base = 'https://secure.runescape.com/m=adventurers-log/api/v1';
+  const [player, acts] = await allOrThrow([
+    request(`${base}/playerData/${user}?includeSkills=true&includeQuests=true`, fetchImpl, wait).then(parsePlayerData),
+    request(`${base}/playerEvents/${user}`, fetchImpl, wait).then(parsePlayerEvents)
   ]);
-  const extra = parseExtra(profile, quests);
-  return { skills, extra };
+  return { skills: player.skills, extra: { ...player.extra, acts } };
 }

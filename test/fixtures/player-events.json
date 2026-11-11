@@ -1,0 +1,45 @@
+{
+  "name": "Example Player",
+  "events": [
+    {
+      "date": "2026-08-08T00:15:00+01:00",
+      "text": "  Levelled \n up Attack.  ",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 2",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 3",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 4",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 5",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-01-01T00:30:00+01:00",
+      "text": "Event 6",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 7",
+      "details": "Long details should not be displayed."
+    },
+    {
+      "date": "2026-08-07T12:00:00Z",
+      "text": "Event 8",
+      "details": "Long details should not be displayed."
+    }
+  ]
+}
